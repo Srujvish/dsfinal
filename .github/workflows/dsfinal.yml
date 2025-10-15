@@ -1,46 +1,41 @@
-name: Run DSFinal Algo for 20 Hours
+name: Run DS Final Bot
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:  # Run manually
+  schedule:
+    - cron: "30 3 * * 1-5"  # Optional: 9:00 AM IST auto start
 
 jobs:
-  run-dsfinal:
+  run-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 1200  # 20 hours
+    env:
+      FYERS_API_KEY: ${{ secrets.FYERS_API_KEY }}
+      ANGEL_API_KEY: ${{ secrets.ANGEL_API_KEY }}
+      CLIENT_CODE: ${{ secrets.CLIENT_CODE }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      TOTP: ${{ secrets.TOTP }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+      FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
 
     steps:
-      # ------------------ Checkout Repo ------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------------ Setup Python ------------------
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # ------------------ Install Dependencies ------------------
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade setuptools wheel
           pip install -r requirements.txt
+          pip install pycryptodome  # Ensures replacement for PyCrypto
 
-      # ------------------ Create .env file from GitHub Secrets ------------------
-      - name: Create .env file
-        run: |
-          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
-          echo "CLIENT_CODE=${{ secrets.CLIENT_CODE }}" >> .env
-          echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
-          echo "TOTP_SECRET=${{ secrets.TOTP_SECRET }}" >> .env
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "CHAT_ID=${{ secrets.CHAT_ID }}" >> .env
-
-      # ------------------ Run DSFinal Script for 20 Hours ------------------
-      - name: Run dsfinal.py continuously
-        run: |
-          END=$((SECONDS+72000))  # 20 hours = 72,000 seconds
-          while [ $SECONDS -lt $END ]; do
-              python dsfinal.py
-              echo "Restarting script if it stops unexpectedly..."
-              sleep 5
-          done
+      - name: Run bot
+        run: python dsfinal.py
