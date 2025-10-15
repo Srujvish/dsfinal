@@ -1,51 +1,35 @@
-name: Run DSFinal Algo for 20 Hours
+name: DS Final Continuous Runner
 
 on:
-  workflow_dispatch:  # Manual trigger
-  # optional: uncomment below to auto-start at 9:10 AM IST (3:40 UTC)
-  # schedule:
-  #   - cron: "40 3 * * 1-5"
+  workflow_dispatch:  # Run manually
+  schedule:
+    - cron: '30 3 * * 1-5'  # optional: runs automatically at 9:00 AM IST (3:30 UTC)
 
 jobs:
-  run-dsfinal:
+  run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 1200  # 20 hours
-
+    timeout-minutes: 1200  # = 20 hours
     steps:
-      # ---------- Checkout Repo ----------
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # ---------- Setup Python ----------
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # ---------- Install Dependencies ----------
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
 
-      # ---------- Create .env File from Secrets ----------
-      - name: Create .env file
+      - name: Run DS Final Script
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          CLIENT_CODE: ${{ secrets.CLIENT_CODE }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          TOTP: ${{ secrets.TOTP }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
-          echo "CLIENT_CODE=${{ secrets.CLIENT_CODE }}" >> .env
-          echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
-          echo "TOTP_SECRET=${{ secrets.TOTP_SECRET }}" >> .env
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "CHAT_ID=${{ secrets.CHAT_ID }}" >> .env
-          echo "FINNHUB_KEY=${{ secrets.FINNHUB_KEY }}" >> .env
-          echo "OTHER_SECRET=${{ secrets.OTHER_SECRET }}" >> .env
-
-      # ---------- Run the Bot Continuously ----------
-      - name: Run dsfinal.py continuously for 20 hours
-        run: |
-          END=$((SECONDS+72000))  # 20 hours = 72,000 seconds
-          while [ $SECONDS -lt $END ]; do
-              echo "🚀 Running dsfinal.py..."
-              python dsfinal.py || echo "⚠️ Script crashed, restarting..."
-              sleep 5
-          done
+          python dsfinal.py
