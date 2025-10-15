@@ -6,6 +6,7 @@ yfinance
 pyotp
 SmartApi
 websocket-client
+logzero
 multitasking
 peewee
 pycryptodome
