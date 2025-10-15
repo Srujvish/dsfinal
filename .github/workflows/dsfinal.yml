@@ -1,36 +1,41 @@
-name: Ultimate Master Algo Bot
+name: Run dsfinal MasterOptionAlgo for 6 Hours Only
 
 on:
-  schedule:
-    # Run Monday to Friday at 9:10 AM IST (3:40 UTC)
-    - cron: '40 3 * * 1-5'
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   run-algo:
     runs-on: ubuntu-latest
-    timeout-minutes: 480  # Max 8 hours
-
-    strategy:
-      matrix:
-        python-version: [3.11]
+    timeout-minutes: 360  # 6 hours
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # ------------------ Checkout Repo ------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      # ------------------ Setup Python ------------------
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip
+      # ------------------ Install Dependencies ------------------
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Install dependencies
-      run: |
-        pip install --no-cache-dir -r requirements.txt
+      # ------------------ Create .env file from GitHub Secrets ------------------
+      - name: Create .env file
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+          echo "CLIENT_CODE=${{ secrets.CLIENT_CODE }}" >> .env
+          echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+          echo "TOTP_SECRET=${{ secrets.TOTP_SECRET }}" >> .env
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "CHAT_ID=${{ secrets.CHAT_ID }}" >> .env
 
-    - name: Run Algo Bot
-      run: |
-        python main.py  # Replace with your script entry point
+      # ------------------ Run dsfinal Script ------------------
+      - name: Run dsfinal.py for 6 hours
+        run: |
+          python dsfinal.py
