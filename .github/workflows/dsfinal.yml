@@ -1,41 +1,46 @@
-name: Run DS Final Bot
-
+name: DSFinal Trading Algorithm
 on:
-  workflow_dispatch:  # Run manually
-  schedule:
-    - cron: "30 3 * * 1-5"  # Optional: 9:00 AM IST auto start
+  workflow_dispatch:  # Manual trigger
 
 jobs:
-  run-bot:
+  run-algo:
     runs-on: ubuntu-latest
-    timeout-minutes: 1200  # 20 hours
-    env:
-      FYERS_API_KEY: ${{ secrets.FYERS_API_KEY }}
-      ANGEL_API_KEY: ${{ secrets.ANGEL_API_KEY }}
-      CLIENT_CODE: ${{ secrets.CLIENT_CODE }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      TOTP: ${{ secrets.TOTP }}
-      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      CHAT_ID: ${{ secrets.CHAT_ID }}
-      FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
-
+    
+    timeout-minutes: 1200  # 20 hours timeout
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade setuptools wheel
-          pip install -r requirements.txt
-          pip install pycryptodome  # Ensures replacement for PyCrypto
-
-      - name: Run bot
-        run: python dsfinal.py
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create environment file with secrets
+      run: |
+        cat > .env << EOF
+        API_KEY=${{ secrets.API_KEY }}
+        CLIENT_CODE=${{ secrets.CLIENT_CODE }}
+        PASSWORD=${{ secrets.PASSWORD }}
+        TOTP_SECRET=${{ secrets.TOTP_SECRET }}
+        BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+        CHAT_ID=${{ secrets.CHAT_ID }}
+        EOF
+        
+    - name: Run trading algorithm
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
+        CLIENT_CODE: ${{ secrets.CLIENT_CODE }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+        TOTP_SECRET: ${{ secrets.TOTP_SECRET }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+      run: |
+        echo "🚀 Starting DSFinal Trading Algorithm for 20 hours..."
+        python dsfinal.py
