@@ -1,10 +1,10 @@
-ta
 yfinance
+pandas
+numpy
+ta-lib
 requests
 pyotp
-pandas
-SmartApi
-logzero
-websocket-client
-smartapi-python
-pycryptodome
+threading
+datetime
+warnings
+math
