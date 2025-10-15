@@ -1,9 +1,9 @@
-pandas
-numpy
-requests
-yfinance
 ta
+yfinance
+requests
 pyotp
+pandas
 SmartApi
-python-dotenv
-pycryptodome
+logzero
+websocket-client
+smartapi-python
