@@ -1,4 +1,4 @@
-name: Run DSFinal Script
+name: Run DSFinal Algo for 20 Hours
 
 on:
   workflow_dispatch:  # Manual trigger
@@ -6,30 +6,41 @@ on:
 jobs:
   run-dsfinal:
     runs-on: ubuntu-latest
-    timeout-minutes: 1200  # 20 hours * 60 minutes
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    timeout-minutes: 1200  # 20 hours
 
+    steps:
+      # ------------------ Checkout Repo ------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------ Setup Python ------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'  # Set your preferred Python version
+          python-version: '3.11'
 
+      # ------------------ Install Dependencies ------------------
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run DSFinal script continuously
-        env:
-          SECRET_1: ${{ secrets.SECRET_1 }}
-          SECRET_2: ${{ secrets.SECRET_2 }}
-          # Add all your hidden variables here
+      # ------------------ Create .env file from GitHub Secrets ------------------
+      - name: Create .env file
         run: |
-          # Loop the script continuously for 20 hours
-          END=$((SECONDS+72000))  # 20 hours = 72000 seconds
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+          echo "CLIENT_CODE=${{ secrets.CLIENT_CODE }}" >> .env
+          echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+          echo "TOTP_SECRET=${{ secrets.TOTP_SECRET }}" >> .env
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "CHAT_ID=${{ secrets.CHAT_ID }}" >> .env
+
+      # ------------------ Run DSFinal Script for 20 Hours ------------------
+      - name: Run dsfinal.py continuously
+        run: |
+          END=$((SECONDS+72000))  # 20 hours = 72,000 seconds
           while [ $SECONDS -lt $END ]; do
               python dsfinal.py
-              sleep 5  # optional short delay between runs
+              echo "Restarting script if it stops unexpectedly..."
+              sleep 5
           done
