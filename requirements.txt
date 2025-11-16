@@ -6,6 +6,8 @@ pandas
 SmartApi
 logzero
 websocket-client
-pyotp
 smartapi-python
 datetime
+pycryptodome
+multitasking
+peewee
